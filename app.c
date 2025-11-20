@@ -1,7 +1,7 @@
 /*
 ---------------------------------------------------------------
     HOTEL MANAGEMENT SYSTEM
-    Developed by: Yash Tripathi, Anoop, Sumit, Arhaan, Sajid
+    Developed By: Anoop Kumar
     Language: C
     Concepts Used: Structures, Linked List, File Handling (DSA)
 ---------------------------------------------------------------
@@ -230,3 +230,4 @@ void loadFromFile() {
     }
     fclose(fp);
 }
+
