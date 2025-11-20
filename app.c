@@ -1,12 +1,3 @@
-/*
----------------------------------------------------------------
-    HOTEL MANAGEMENT SYSTEM
-    Developed By: Anoop Kumar
-    Language: C
-    Concepts Used: Structures, Linked List, File Handling (DSA)
----------------------------------------------------------------
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,13 +7,12 @@ struct Customer {
     int roomNumber;
     char name[50];
     char address[100];
-    char phone[15];
+    char phone[20];
     int days;
     float totalBill;
-    struct Customer *next;  // pointer to next node (for linked list)
+    struct Customer *next;
 };
 
-// Global pointer to the first node
 struct Customer *head = NULL;
 
 // ==================== FUNCTION DECLARATIONS ====================
@@ -32,128 +22,65 @@ void searchCustomer();
 void deleteCustomer();
 void saveToFile();
 void loadFromFile();
-float calculateBill(int days);
-void header();
 
-// ==================== MAIN FUNCTION ====================
-int main() {
-    int choice;
-    loadFromFile();  // Load previous data from file (if any)
-
-    do {
-        header();
-        printf("\n1. Add New Customer");
-        printf("\n2. Display All Customers");
-        printf("\n3. Search Customer by Room");
-        printf("\n4. Delete Customer Record");
-        printf("\n5. Save & Exit");
-        printf("\n\nEnter your choice: ");
-        scanf("%d", &choice);
-
-        switch(choice) {
-            case 1: addCustomer(); break;
-            case 2: displayCustomers(); break;
-            case 3: searchCustomer(); break;
-            case 4: deleteCustomer(); break;
-            case 5: saveToFile(); printf("\nData saved successfully. Exiting...\n"); break;
-            default: printf("\n❌ Invalid choice! Please try again.\n");
-        }
-
-        if(choice != 5) {
-            printf("\nPress Enter to continue...");
-            getchar(); getchar(); // pause before showing menu again
-        }
-
-    } while(choice != 5);
-
-    return 0;
-}
-
-// ==================== FUNCTION DEFINITIONS ====================
-
-// Prints a fancy header
-void header() {
-    system("cls");  // clear console (use "clear" for Linux)
-    printf("===============================================================\n");
-    printf("           HOTEL MANAGEMENT SYSTEM (DSA PROJECT)              \n");
-    printf("===============================================================\n");
-}
-
-// Calculate bill based on number of days
-float calculateBill(int days) {
-    float ratePerDay = 1500.0;  // base rate per day
-    return days * ratePerDay;
-}
-
-// Add new customer record (inserts at beginning of linked list)
+// ==================== ADD CUSTOMER ====================
 void addCustomer() {
     struct Customer *newCust = (struct Customer*)malloc(sizeof(struct Customer));
-    if(!newCust) {
-        printf("Memory allocation failed!\n");
-        return;
-    }
 
     printf("\nEnter Room Number: ");
     scanf("%d", &newCust->roomNumber);
 
-    // Check if room already exists
-    struct Customer *temp = head;
-    while(temp != NULL) {
-        if(temp->roomNumber == newCust->roomNumber) {
-            printf("\n Room already booked! Please choose another room.\n");
-            free(newCust);
-            return;
-        }
-        temp = temp->next;
-    }
-
     printf("Enter Name: ");
-    scanf(" %[^\n]", newCust->name);
+    scanf("%s", newCust->name);
 
     printf("Enter Address: ");
-    scanf(" %[^\n]", newCust->address);
+    scanf("%s", newCust->address);
 
-    printf("Enter Phone Number: ");
-    scanf(" %[^\n]", newCust->phone);
+    printf("Enter Phone: ");
+    scanf("%s", newCust->phone);
 
-    printf("Enter Number of Days: ");
+    printf("Enter Days Stayed: ");
     scanf("%d", &newCust->days);
 
-    newCust->totalBill = calculateBill(newCust->days);
-    newCust->next = head;  // insert at head
+    newCust->totalBill = newCust->days * 1000; // Example billing calculation
+
+    newCust->next = head;
     head = newCust;
 
-    printf("\n Customer added successfully!");
+    printf("\nCustomer added successfully!\n");
 }
 
-// Display all customers (traverse linked list)
+// ==================== DISPLAY CUSTOMERS ====================
 void displayCustomers() {
     struct Customer *temp = head;
 
-    if(temp == NULL) {
+    if (temp == NULL) {
         printf("\nNo customer records found!\n");
         return;
     }
 
-    printf("\n%-10s %-20s %-15s %-6s %-10s\n", "Room", "Name", "Phone", "Days", "Bill");
-    printf("---------------------------------------------------------------\n");
+    printf("\n%-10s %-20s %-20s %-12s %-6s %-10s\n",
+           "Room", "Name", "Address", "Phone", "Days", "Bill");
+    printf("-------------------------------------------------------------------------------\n");
 
-    while(temp != NULL) {
-        printf("%-10d %-20s %-15s %-6d ₹%-10.2f\n",
-               temp->roomNumber, temp->name, temp->phone, temp->days, temp->totalBill);
+    while (temp != NULL) {
+        printf("%-10d %-20s %-20s %-12s %-6d ₹%-10.2f\n",
+               temp->roomNumber, temp->name, temp->address,
+               temp->phone, temp->days, temp->totalBill);
         temp = temp->next;
     }
 }
 
-// Search for a customer by room number
+// ==================== SEARCH CUSTOMER ====================
 void searchCustomer() {
     int room;
     printf("\nEnter Room Number to search: ");
     scanf("%d", &room);
 
     struct Customer *temp = head;
-    while(temp != NULL) {
-        if(temp->roomNumber == room) {
+
+    while (temp != NULL) {
+        if (temp->roomNumber == room) {
             printf("\nCustomer Found!\n");
             printf("-----------------------\n");
             printf("Name: %s\n", temp->name);
@@ -165,10 +92,10 @@ void searchCustomer() {
         }
         temp = temp->next;
     }
-    printf("\n No record found for Room %d\n", room);
+    printf("\nNo record found for Room %d\n", room);
 }
 
-// Delete a customer record
+// ==================== DELETE CUSTOMER ====================
 void deleteCustomer() {
     int room;
     printf("\nEnter Room Number to delete: ");
@@ -176,53 +103,56 @@ void deleteCustomer() {
 
     struct Customer *temp = head, *prev = NULL;
 
-    while(temp != NULL && temp->roomNumber != room) {
+    while (temp != NULL && temp->roomNumber != room) {
         prev = temp;
         temp = temp->next;
     }
 
-    if(temp == NULL) {
-        printf("\n Customer not found!\n");
+    if (temp == NULL) {
+        printf("\nCustomer not found!\n");
         return;
     }
 
-    // If deleting first node
-    if(prev == NULL)
+    if (prev == NULL)
         head = temp->next;
     else
         prev->next = temp->next;
 
     free(temp);
-    printf("\n Record deleted successfully!");
+    printf("\nRecord deleted successfully!\n");
 }
 
-// Save data to file (persistent storage)
+// ==================== SAVE TO FILE ====================
 void saveToFile() {
     FILE *fp = fopen("hotel_data.txt", "w");
-    if(!fp) {
+    if (!fp) {
         printf("\nError opening file for saving!\n");
         return;
     }
 
     struct Customer *temp = head;
-    while(temp != NULL) {
+
+    while (temp != NULL) {
         fprintf(fp, "%d,%s,%s,%s,%d,%.2f\n",
                 temp->roomNumber, temp->name, temp->address,
                 temp->phone, temp->days, temp->totalBill);
         temp = temp->next;
     }
+
     fclose(fp);
 }
 
-// Load data from file into linked list (runs at start)
+// ==================== LOAD FROM FILE ====================
 void loadFromFile() {
     FILE *fp = fopen("hotel_data.txt", "r");
-    if(!fp) return; // no file yet (first run)
+    if (!fp) return;
 
     struct Customer cust;
-    while(fscanf(fp, "%d,%[^,],%[^,],%[^,],%d,%f\n",
-          &cust.roomNumber, cust.name, cust.address, cust.phone,
-          &cust.days, &cust.totalBill) != EOF) {
+
+    while (fscanf(fp, "%d,%[^,],%[^,],%[^,],%d,%f\n",
+                  &cust.roomNumber, cust.name, cust.address,
+                  cust.phone, &cust.days, &cust.totalBill) != EOF) {
+
         struct Customer *newCust = (struct Customer*)malloc(sizeof(struct Customer));
         *newCust = cust;
         newCust->next = head;
@@ -231,3 +161,31 @@ void loadFromFile() {
     fclose(fp);
 }
 
+// ==================== MAIN FUNCTION ====================
+int main() {
+    int choice;
+
+    loadFromFile();
+
+    while (1) {
+        printf("\n========== HOTEL MANAGEMENT SYSTEM ==========\n");
+        printf("1. Add Customer\n");
+        printf("2. Display All Customers\n");
+        printf("3. Search Customer\n");
+        printf("4. Delete Customer\n");
+        printf("5. Save & Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: addCustomer(); break;
+            case 2: displayCustomers(); break;
+            case 3: searchCustomer(); break;
+            case 4: deleteCustomer(); break;
+            case 5: saveToFile();
+                    printf("\nData saved. Exiting...\n");
+                    exit(0);
+            default: printf("\nInvalid Choice!\n");
+        }
+    }
+}
